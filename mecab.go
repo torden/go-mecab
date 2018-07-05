@@ -69,10 +69,10 @@ const (
 	// AnyBoundary is The token boundary is not specified.
 	AnyBoundary = C.MECAB_ANY_BOUNDARY
 
-	// The position is a strong token boundary.
+	// TokenBoundary is The position is a strong token boundary.
 	TokenBoundary = C.MECAB_TOKEN_BOUNDARY
 
-	// The position is not a token boundary.
+	// InsideToken is The position is not a token boundary.
 	InsideToken = C.MECAB_INSIDE_TOKEN
 )
 
@@ -465,7 +465,7 @@ func (m *MeCab) SetAllMorphs(allmorphs bool) error {
 	return nil
 }
 
-// GetTheTA Returns temparature parameter theta.
+// GetTheTA Returns temperature parameter theta.
 // if an error occurs, returns error
 func (m *MeCab) GetTheTA() (float32, error) {
 
@@ -477,7 +477,7 @@ func (m *MeCab) GetTheTA() (float32, error) {
 	return float32(retval), nil
 }
 
-// SetTheTA Sets temparature parameter theta.
+// SetTheTA Sets temperature parameter theta.
 // if an error occurs, returns error
 func (m *MeCab) SetTheTA(theta float32) error {
 
