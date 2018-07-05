@@ -1,0 +1,9 @@
+Package: mecab-ko-all
+Version: 0.996-ko-0.9.2-dic-2.0.3-20170922
+Section: release
+Priority: optional
+Architecture: amd64
+Depends:
+Maintainer: Torden <torden@myself.com>
+Homepage: https://bitbucket.org/eunjeon/mecab-ko
+Description: mecab-ko (2015-02-27 908db8d) with mecab-ko-dic (2017-10-10 e39e160) package
