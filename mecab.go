@@ -92,11 +92,11 @@ type DicInfo struct {
 
 // NLPAnalyzed represents the List of NLP Analyzed Data
 type NLPAnalyzed struct {
-	Result []NLPAnalyzedItem
+	Result []Item
 }
 
-// NLPAnalyzedItem represents the NLP Analyzed Item Including Value and Tag
-type NLPAnalyzedItem struct {
+// Item represents the NLP Analyzed Item Including Value and Tag
+type Item struct {
 	Value string
 	Tag   string
 }
@@ -652,7 +652,7 @@ func (m *MeCab) parser(args ...string) (NLPAnalyzed, error) {
 		switch argc {
 
 		case 1:
-			retval.Result = append(retval.Result, NLPAnalyzedItem{Value: tmpitem[0], Tag: tmpval[0]})
+			retval.Result = append(retval.Result, Item{Value: tmpitem[0], Tag: tmpval[0]})
 
 		case 2:
 			if tmpval[0] == "NR" { //NR = rhetoric (수사)
@@ -660,7 +660,7 @@ func (m *MeCab) parser(args ...string) (NLPAnalyzed, error) {
 			}
 
 			if strings.HasPrefix(tmpval[0], feature) {
-				retval.Result = append(retval.Result, NLPAnalyzedItem{Value: tmpitem[0], Tag: tmpval[0]})
+				retval.Result = append(retval.Result, Item{Value: tmpitem[0], Tag: tmpval[0]})
 			}
 		}
 	}
