@@ -77,7 +77,7 @@ const (
 )
 
 // Tag v2.0 : https://docs.google.com/spreadsheets/d/1-9blXKjtjeKZqsf4NzHeYJCrr49-nXeRF6D80udfcwY/edit#gid=589544265
-var tagList = []string{"NNG", "NNP", "NNB", "NNBC", "NR", "NP", "VV", "VA", "VX", "VCP", "VCN", "MM", "MAG", "MAJ", "IC", "JKS", "JKC", "JKG", "JKO", "JKB", "JKV", "JKQ", "JX", "JC", "EP", "EF", "EC", "ETN", "ETM", "XPN", "XSN", "XSV", "XSA", "XR", "SF", "SE", "SSO", "SSC", "SC", "SY", "SL", "SH", "SN"}
+var allowTagList = []string{"NNG", "NNP", "NNB", "NNBC", "NR", "NP", "VV", "VA", "VX", "VCP", "VCN", "MM", "MAG", "MAJ", "IC", "JKS", "JKC", "JKG", "JKO", "JKB", "JKV", "JKQ", "JX", "JC", "EP", "EF", "EC", "ETN", "ETM", "XPN", "XSN", "XSV", "XSA", "XR", "SF", "SE", "SSO", "SSC", "SC", "SY", "SL", "SH", "SN"}
 
 // DicInfo represents the mecab_dictionary_info_t structure
 type DicInfo struct {
@@ -126,6 +126,8 @@ type MeCab struct {
 	mutx        sync.RWMutex
 }
 
+var useNewMeCab int = 0 //for panic(SIGSEGV)
+
 // NewMeCab Creates and returns a MeCab Library methods's pointer.
 func NewMeCab(dicpath string) *MeCab {
 
@@ -153,14 +155,20 @@ func NewMeCab(dicpath string) *MeCab {
 
 	obj.dicPath = fmt.Sprintf("-d %s", dicpath)
 
+	useNewMeCab = 1
+
 	return obj
 }
 
 // checkInit does check the Initilization, if not inited, returns error
 func (m *MeCab) checkInit() error {
 
+	if useNewMeCab == 0 {
+		return errors.New("not initialized object(NewMeCab()) go-mecab (MeCab-Ko)")
+	}
+
 	if !m.isInit {
-		return errors.New("not initialized(Init()) go-mecab-ko (MeCab-Ko)")
+		return errors.New("not initialized(Init()) go-mecab (MeCab-Ko)")
 	}
 
 	return nil
@@ -169,8 +177,12 @@ func (m *MeCab) checkInit() error {
 // checkInit does check the Mecab's Model Initilization, if not inited, returns error
 func (m *MeCab) checkInitModel() error {
 
+	if useNewMeCab == 0 {
+		return errors.New("not initialized object(NewMeCab()) go-mecab (MeCab-Ko)")
+	}
+
 	if !m.isInitModel {
-		return errors.New("not initialized(InitModel()) go-mecab-ko (MeCab-Ko)")
+		return errors.New("not initialized(InitModel()) go-mecab (MeCab-Ko)")
 	}
 
 	return nil
@@ -266,15 +278,24 @@ func (m *MeCab) Destroy() {
 	}
 
 	if m.checkInitModel() != nil {
-		C.mecab_lattice_destroy(m.plattice)
-		C.mecab_model_destroy(m.pmodel)
-		C.mecab_destroy(m.ptagger)
+
+		if m.plattice != nil {
+			C.mecab_lattice_destroy(m.plattice)
+		}
+
+		if m.pmodel != nil {
+			C.mecab_model_destroy(m.pmodel)
+		}
+
+		if m.ptagger != nil {
+			C.mecab_destroy(m.ptagger)
+		}
 	}
 
 	m.plattice = nil
 	m.pmodel = nil
 	m.pmecab = nil
-	m.pmodel = nil
+	m.ptagger = nil
 
 	m.isInit = false
 	m.isInitModel = false
@@ -596,23 +617,12 @@ func (m *MeCab) LatticeGetEosNode() (*C.struct_mecab_node_t, error) {
 
 // parser does parsing the nlp analyzed data
 // if an error occurs, returns error
-func (m *MeCab) parser(args ...string) (NLPAnalyzed, error) {
+func (m *MeCab) parser(text string, taglist ...string) (NLPAnalyzed, error) {
 
 	var err error
 	var retval NLPAnalyzed
-	var text, feature string
 
-	argc := len(args)
-	if argc < 1 {
-		return retval, errors.New("required! input-data")
-	}
-
-	text = args[0]
-	if argc > 1 {
-		feature = args[1]
-	}
-
-	if !m.isInitModel {
+	if m.checkInitModel() != nil {
 		err = m.InitModel()
 		if err != nil {
 			return retval, err
@@ -640,6 +650,8 @@ func (m *MeCab) parser(args ...string) (NLPAnalyzed, error) {
 		return retval, errors.New("result was empty")
 	}
 
+	argc := len(taglist)
+
 	for _, tmpline := range reslist {
 
 		if tmpline == "EOS" || len(tmpline) < 1 {
@@ -649,30 +661,20 @@ func (m *MeCab) parser(args ...string) (NLPAnalyzed, error) {
 		tmpitem := strings.Split(tmpline, "\t")
 		tmpval := strings.Split(tmpitem[1], ",")
 
-		switch argc {
+		if argc > 0 {
 
-		case 1:
+			for _, tag := range taglist {
+				if tmpval[0] == tag {
+					retval.Result = append(retval.Result, Item{Value: tmpitem[0], Tag: tmpval[0]})
+				}
+			}
+		} else {
 			retval.Result = append(retval.Result, Item{Value: tmpitem[0], Tag: tmpval[0]})
 
-		case 2:
-			if tmpval[0] == "NR" { //NR = rhetoric (수사)
-				continue
-			}
-
-			if strings.HasPrefix(tmpval[0], feature) {
-				retval.Result = append(retval.Result, Item{Value: tmpitem[0], Tag: tmpval[0]})
-			}
 		}
 	}
 
 	return retval, nil
-}
-
-// NounsWithTagInfo returns the nouns with tag id from nlp analyzed data
-// if an error occurs, returns error
-// Obtains all nouns (NNG, NNP, NNB, NNBC, NP, without NR)
-func (m *MeCab) NounsWithTagInfo(text string) (NLPAnalyzed, error) {
-	return m.parser(text, "N")
 }
 
 // Pos returns return the whole nlp analyzed data
@@ -681,10 +683,37 @@ func (m *MeCab) Pos(text string) (NLPAnalyzed, error) {
 	return m.parser(text)
 }
 
+// NounsWithTagInfo returns the nouns with tag id from nlp analyzed data
+// if an error occurs, returns error
+// Obtains all nouns (NNG, NNP, NNB, NNBC, NP)
+func (m *MeCab) NounsWithTagInfo(text string) (NLPAnalyzed, error) {
+	return m.parser(text, "NNG", "NNP", "NNB", "NNBC", "NP")
+}
+
 // Nouns returns the only nouns without tag from nlp analyzed data
 // if an error occurs, returns error
+// Obtains all nouns (NNG, NNP, NNB, NNBC, NP)
 func (m *MeCab) Nouns(text string) ([]string, error) {
-	result, err := m.parser(text, "N")
+	result, err := m.parser(text, "NNG", "NNP", "NNB", "NNBC", "NP")
+	return result.GetValues(), err
+}
+
+// ExtendedNounsWithTagInfo is alias of NounsWithTagInfo
+// Obtains all nouns with foreign language (NNG, NNP, NNB, NNBC, NP, SL, SH)
+func (m *MeCab) ExtendedNounsWithTagInfo(text string) (NLPAnalyzed, error) {
+	return m.parser(text, "NNG", "NNP", "NNB", "NNBC", "NP", "SL", "SH")
+}
+
+// ExtendedNouns is alias of Nouns
+// Obtains all nouns with foreign language (NNG, NNP, NNB, NNBC, NP, SL, SH)
+func (m *MeCab) ExtendedNouns(text string) ([]string, error) {
+	result, err := m.parser(text, "NNG", "NNP", "NNB", "NNBC", "NP", "SL", "SH")
+	return result.GetValues(), err
+}
+
+// Keyword returns the NNG, NNP, NNB, NNBC, NP, SL, SH, SN, IC
+func (m *MeCab) Keywords(text string) ([]string, error) {
+	result, err := m.parser(text, "NNG", "NNP", "NNB", "NNBC", "NP", "SL", "SH", "SN", "IC")
 	return result.GetValues(), err
 }
 
@@ -697,30 +726,34 @@ func (m *MeCab) Morphs(text string) ([]string, error) {
 
 // ByTagWithTagInfo returns the nlp analyzed data by tag-id (begins with prefix)
 // if an error occurs, returns error
-func (m *MeCab) ByTagWithTagInfo(text string, tag string) (NLPAnalyzed, error) {
-	return m.parser(text, tag)
+func (m *MeCab) ByTagWithTagInfo(text string, taglist ...string) (NLPAnalyzed, error) {
+	return m.parser(text, taglist...)
 }
 
 // ByTag returns the nlp analyzed data by tag-id (begins with prefix) without tag-id
 // if an error occurs, returns error
-func (m *MeCab) ByTag(text string, tag string) ([]string, error) {
+func (m *MeCab) ByTag(text string, taglist ...string) ([]string, error) {
 
 	var retval []string
 	var err error
 
 	ok := false
-	for _, val := range tagList {
-		if val == tag {
-			ok = true
-			break
+
+	for _, tag := range taglist {
+
+		for _, val := range allowTagList {
+			if tag == val {
+				ok = true
+				break
+			}
+		}
+
+		if !ok {
+			return retval, fmt.Errorf("not allow tag(=%s)", tag)
 		}
 	}
 
-	if !ok {
-		return retval, fmt.Errorf("not allow tag(=%s)", tag)
-	}
-
-	result, err := m.parser(text, tag)
+	result, err := m.parser(text, taglist...)
 	retval = result.GetValues()
 	return retval, err
 }

@@ -10,7 +10,7 @@ import (
 
 var assert = strutils.NewAssert()
 
-var gMeCab *mecab.MeCab
+var gMeCab = mecab.NewMeCab("/usr/local/mecab-ko/lib/mecab/dic/mecab-ko-dic/")
 
 var str_kr = `mecab-ko는 은전한닢 프로젝트에서 사용하기 위한 MeCab의 fork 프로젝트 입니다.
 최소한의 변경으로 한국어의 특성에 맞는 기능을 추가하는 것이 목표입니다.`
@@ -27,10 +27,6 @@ var tagList = []string{"NNG", "NNP", "NNB", "NNBC", "NR", "NP",
 	"EP", "EF", "EC", "ETN", "ETM",
 	"XPN", "XSN", "XSV", "XSA", "XR",
 	"SF", "SE", "SSO", "SSC", "SC", "SY", "SL", "SH", "SN"}
-
-func TestMain(t *testing.T) {
-	gMeCab = mecab.NewMeCab("/usr/local/mecab-ko/lib/mecab/dic/mecab-ko-dic/")
-}
 
 func Test_mecab_NewMeCab(t *testing.T) {
 
