@@ -1,0 +1,12 @@
+{
+	"ImportPath": "github.com/torden/go-mecab",
+	"GoVersion": "go1.8",
+	"GodepVersion": "v79",
+	"Deps": [
+		{
+			"ImportPath": "github.com/torden/go-strutil",
+			"Comment": "v0.1.0",
+			"Rev": "19cd99013efc19541fc33b3f403b5cc2129042f8"
+		}
+	]
+}
