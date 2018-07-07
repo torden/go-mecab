@@ -126,7 +126,7 @@ type MeCab struct {
 	mutx        sync.RWMutex
 }
 
-var useNewMeCab int = 0 //for panic(SIGSEGV)
+var useNewMeCab = 0 //for panic(SIGSEGV)
 
 // NewMeCab Creates and returns a MeCab Library methods's pointer.
 func NewMeCab(dicpath string) *MeCab {
@@ -711,7 +711,7 @@ func (m *MeCab) ExtendedNouns(text string) ([]string, error) {
 	return result.GetValues(), err
 }
 
-// Keyword returns the NNG, NNP, NNB, NNBC, NP, SL, SH, SN, IC
+// Keywords returns the NNG, NNP, NNB, NNBC, NP, SL, SH, SN, IC
 func (m *MeCab) Keywords(text string) ([]string, error) {
 	result, err := m.parser(text, "NNG", "NNP", "NNB", "NNBC", "NP", "SL", "SH", "SN", "IC")
 	return result.GetValues(), err
