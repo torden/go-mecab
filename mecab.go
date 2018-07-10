@@ -128,16 +128,25 @@ type MeCab struct {
 
 var useNewMeCab = 0 //for panic(SIGSEGV)
 
+func checkNewMeCab() error {
+
+	if useNewMeCab == 0 {
+		return errors.New("object not initilized(NewMeCab()) go-mecab (MeCab-Ko)")
+	}
+
+	return nil
+}
+
 // NewMeCab Creates and returns a MeCab Library methods's pointer.
 func NewMeCab(dicpath string) *MeCab {
 
 	if len(strings.TrimSpace(dicpath)) < 1 {
-		fmt.Fprintf(os.Stderr, "`dicpath` was empty")
+		fmt.Fprintf(os.Stderr, "`dicpath(=%s)` was empty\n", dicpath)
 		return nil
 	}
 
 	if _, err := os.Stat(dicpath); os.IsNotExist(err) {
-		fmt.Fprintf(os.Stderr, "`%s' does not exists", dicpath)
+		fmt.Fprintf(os.Stderr, "`%s' does not exists\n", dicpath)
 		return nil
 	}
 
@@ -163,8 +172,9 @@ func NewMeCab(dicpath string) *MeCab {
 // checkInit does check the Initilization, if not inited, returns error
 func (m *MeCab) checkInit() error {
 
-	if useNewMeCab == 0 {
-		return errors.New("not initialized object(NewMeCab()) go-mecab (MeCab-Ko)")
+	err := checkNewMeCab()
+	if err != nil {
+		return err
 	}
 
 	if !m.isInit {
@@ -177,8 +187,9 @@ func (m *MeCab) checkInit() error {
 // checkInit does check the Mecab's Model Initilization, if not inited, returns error
 func (m *MeCab) checkInitModel() error {
 
-	if useNewMeCab == 0 {
-		return errors.New("not initialized object(NewMeCab()) go-mecab (MeCab-Ko)")
+	err := checkNewMeCab()
+	if err != nil {
+		return err
 	}
 
 	if !m.isInitModel {
@@ -207,6 +218,11 @@ func (m *MeCab) LastError() error {
 // Init does Initialization the mecab, if an error occurs, returns error
 func (m *MeCab) Init() error {
 
+	err := checkNewMeCab()
+	if err != nil {
+		return err
+	}
+
 	if len(m.dicPath) < 1 {
 		return fmt.Errorf("failed to Init, after set the dictionary path")
 	}
@@ -232,6 +248,11 @@ func (m *MeCab) Init() error {
 
 // InitModel does Initialization the mecab's model, if an error occurs, returns error
 func (m *MeCab) InitModel() error {
+
+	err := checkNewMeCab()
+	if err != nil {
+		return err
+	}
 
 	if len(m.dicPath) < 1 {
 		return fmt.Errorf("failed to Init, after set the dictionary path")
@@ -273,11 +294,15 @@ func (m *MeCab) InitModel() error {
 // Destroy closes the MeCab-Ko's underlying file descriptor and delete objects
 func (m *MeCab) Destroy() {
 
-	if m.checkInit() != nil {
+	if useNewMeCab == 0 { //didn't init
+		return
+	}
+
+	if m.checkInit() == nil {
 		C.mecab_destroy(m.pmecab)
 	}
 
-	if m.checkInitModel() != nil {
+	if m.checkInitModel() == nil {
 
 		if m.plattice != nil {
 			C.mecab_lattice_destroy(m.plattice)
@@ -515,6 +540,11 @@ func (m *MeCab) SetTheTA(theta float32) error {
 func (m *MeCab) GetDictionaryInfo() ([]DicInfo, error) {
 
 	var retval []DicInfo
+
+	err := checkNewMeCab()
+	if err != nil {
+		return retval, err
+	}
 
 	if err := m.checkInit(); err != nil {
 		return retval, err

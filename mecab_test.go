@@ -10,7 +10,8 @@ import (
 
 var assert = strutils.NewAssert()
 
-var gMeCab = mecab.NewMeCab("/usr/local/mecab-ko/lib/mecab/dic/mecab-ko-dic/")
+var defaultDicPath = "/usr/local/mecab-ko/lib/mecab/dic/mecab-ko-dic/"
+var gMeCab = mecab.NewMeCab(defaultDicPath)
 
 var str_kr = `mecab-ko는 은전한닢 프로젝트에서 사용하기 위한 MeCab의 fork 프로젝트 입니다.
 최소한의 변경으로 한국어의 특성에 맞는 기능을 추가하는 것이 목표입니다.`
@@ -36,23 +37,23 @@ func Test_mecab_NewMeCab(t *testing.T) {
 	err2 := mecab.NewMeCab("/dev/TEST")
 	assert.AssertNotNil(t, err2, "failed to testing about wrong dicpath")
 
-	test1 := mecab.NewMeCab("/usr/local/mecab-ko/lib/mecab/dic/mecab-ko-dic/")
+	test1 := mecab.NewMeCab(defaultDicPath)
 	test1.Destroy()
 
-	test2 := mecab.NewMeCab("/usr/local/mecab-ko/lib/mecab/dic/mecab-ko-dic/")
+	test2 := mecab.NewMeCab(defaultDicPath)
 	test2.Init()
 	test2.Destroy()
 
-	test3 := mecab.NewMeCab("/usr/local/mecab-ko/lib/mecab/dic/mecab-ko-dic/")
+	test3 := mecab.NewMeCab(defaultDicPath)
 	test3.InitModel()
 	test3.Destroy()
 
-	test4 := mecab.NewMeCab("/usr/local/mecab-ko/lib/mecab/dic/mecab-ko-dic/")
+	test4 := mecab.NewMeCab(defaultDicPath)
 	test4.Init()
 	test4.InitModel()
 	test4.Destroy()
 
-	test5 := mecab.NewMeCab("/usr/local/mecab-ko/lib/mecab/dic/mecab-ko-dic/")
+	test5 := mecab.NewMeCab(defaultDicPath)
 	test5.Init()
 	test5.Init()
 	test5.Init()
@@ -159,13 +160,16 @@ func Test_mecab_GetDictionaryInfo(t *testing.T) {
 	retval, err := gMeCab.GetDictionaryInfo()
 	assert.AssertNil(t, err, "failed to testing about GetDictionaryInfo")
 
-	assert.AssertGreaterThan(t, len((retval[0]).FileName), 1, "failed to testing about GetDictionaryInfo.FileName")
-	assert.AssertGreaterThan(t, len((retval[0]).CharSet), 1, "failed to testing about GetDictionaryInfo.CharSet")
-	assert.AssertGreaterThan(t, (retval[0]).Size, 1, "failed to testing about GetDictionaryInfo.Size")
-	assert.AssertGreaterThanEqualTo(t, (retval[0]).Type, 0, "failed to testing about GetDictionaryInfo.Type")
-	assert.AssertGreaterThanEqualTo(t, (retval[0]).Lsize, 1, "failed to testing about GetDictionaryInfo.Lsize")
-	assert.AssertGreaterThanEqualTo(t, (retval[0]).Rsize, 1, "failed to testing about GetDictionaryInfo.Rsize")
-	assert.AssertGreaterThanEqualTo(t, (retval[0]).Version, 100, "failed to testing about GetDictionaryInfo.Version")
+	if len(retval) > 0 {
+
+		assert.AssertGreaterThan(t, len((retval[0]).FileName), 1, "failed to testing about GetDictionaryInfo.FileName")
+		assert.AssertGreaterThan(t, len((retval[0]).CharSet), 1, "failed to testing about GetDictionaryInfo.CharSet")
+		assert.AssertGreaterThan(t, (retval[0]).Size, 1, "failed to testing about GetDictionaryInfo.Size")
+		assert.AssertGreaterThanEqualTo(t, (retval[0]).Type, 0, "failed to testing about GetDictionaryInfo.Type")
+		assert.AssertGreaterThanEqualTo(t, (retval[0]).Lsize, 1, "failed to testing about GetDictionaryInfo.Lsize")
+		assert.AssertGreaterThanEqualTo(t, (retval[0]).Rsize, 1, "failed to testing about GetDictionaryInfo.Rsize")
+		assert.AssertGreaterThanEqualTo(t, (retval[0]).Version, 100, "failed to testing about GetDictionaryInfo.Version")
+	}
 }
 
 func Test_mecab_NounsWithTagInfo_KR(t *testing.T) {

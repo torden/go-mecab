@@ -48,6 +48,14 @@ PATH_PROF_MEM=$(PKG_NAME).mem.prof
 PATH_PROF_BLOCK=$(PKG_NAME).block.prof
 PATH_PROF_MUTEX=$(PKG_NAME).mutex.prof
 
+PREFIX_MECAB?=/usr/local/mecab-ko
+MECAB_LDFLAGS		:=$(shell $(PREFIX_MECAB)/bin/mecab-config --libs)
+MECAB_ONLY_LD_PATH	:=$(shell $(PREFIX_MECAB)/bin/mecab-config --libs-only-L)
+MECAB_CFLAGS 		:=$(shell $(PREFIX_MECAB)/bin/mecab-config --cflags)
+MECAB_DICPDIR		:=$(shell $(PREFIX_MECAB)/bin/mecab-config --dicdir)
+
+EXEC_GO=CGO_CFLAGS="$(MECAB_CFLAGS) -I./" CGO_LDFLAGS="$(MECAB_LDFLAGS) -Wl,-rpath,$(MECAB_ONLY_LD_PATH)" $(CMD_GO)
+
 VER_GOLANG=$(shell go version | awk '{print $$3}' | sed -e "s/go//;s/\.//g")
 GOLANGV18_OVER=$(shell [ "$(VER_GOLANG)" -ge "180" ] && echo 1 || echo 0)
 
@@ -74,13 +82,13 @@ setup::
 ## Build the go-mecab
 build::
 	@$(CMD_ECHO)  -e "\033[1;40;32mBuild the go-mecab.\033[01;m\x1b[0m"
-	@$(CMD_GO) build
+	@$(EXEC_GO) build
 	@$(CMD_ECHO) -e "\033[1;40;36mDone\033[01;m\x1b[0m"
 
 ## Build the go-mecab for development
 devbuild::
 	@$(CMD_ECHO)  -e "\033[1;40;32mBuild the go-mecab.\033[01;m\x1b[0m"
-	@$(CMD_GO) build -x -v -gcflags="-N -l" 
+	@$(EXEC_GO) build -x -v -gcflags="-N -l" 
 	@$(CMD_ECHO) -e "\033[1;40;36mDone\033[01;m\x1b[0m"
 
 ## Run a LintChecker (Normal)
@@ -99,17 +107,10 @@ strictlint: setup
 	@$(CMD_ECHO) -e "\033[1;40;36mDone\033[01;m\x1b[0m"
 
 ## Run Go Test with Data Race Detection
-testassert: clean
-	@$(CMD_ECHO)  -e "\033[1;40;32mRun Go Test.\033[01;m\x1b[0m"
-	@$(CMD_GO) test -v -test.parallel 4 -race -run Test_mecabs_Assert*
-	@$(CMD_ECHO) -e "\033[1;40;36mGenerated a report of data race detection in $(PATH_REPORT)/doc/$(PATH_RACE_REPORT).pid\033[01;m\x1b[0m"
-	@$(CMD_ECHO) -e "\033[1;40;36mDone\033[01;m\x1b[0m"
-
-## Run Go Test with Data Race Detection
 test: clean
 	@$(CMD_MKDIR) -p $(PATH_REPORT)/raw/ $(PATH_REPORT)/doc/
 	@$(CMD_ECHO)  -e "\033[1;40;32mRun Go Test.\033[01;m\x1b[0m"
-	@GORACE="log_path=$(PATH_REPORT)/doc/$(PATH_RACE_REPORT)" $(CMD_GO) test -tags unittest -v -test.parallel 4 -race -coverprofile=$(PATH_REPORT)/raw/$(PATH_CONVER_PROFILE)
+	@GORACE="log_path=$(PATH_REPORT)/doc/$(PATH_RACE_REPORT)" $(EXEC_GO) test -tags unittest -v -test.parallel 4 -race -coverprofile=$(PATH_REPORT)/raw/$(PATH_CONVER_PROFILE)
 	@$(CMD_ECHO) -e "\033[1;40;36mGenerated a report of data race detection in $(PATH_REPORT)/doc/$(PATH_RACE_REPORT).pid\033[01;m\x1b[0m"
 	@$(CMD_ECHO) -e "\033[1;40;36mDone\033[01;m\x1b[0m"
 
@@ -123,8 +124,8 @@ coveralls::
 ## Generate a report about coverage
 cover: test
 	@$(CMD_ECHO)  -e "\033[1;40;32mGenerate a report about coverage.\033[01;m\x1b[0m"
-	@$(CMD_GO) tool cover -func=$(PATH_CONVER_PROFILE) -o $(PATH_CONVER_PROFILE).txt
-	@$(CMD_GO) tool cover -html=$(PATH_CONVER_PROFILE)  -o $(PATH_CONVER_PROFILE).html
+	@$(EXEC_GO) tool cover -func=$(PATH_CONVER_PROFILE) -o $(PATH_CONVER_PROFILE).txt
+	@$(EXEC_GO) tool cover -html=$(PATH_CONVER_PROFILE)  -o $(PATH_CONVER_PROFILE).html
 	@$(CMD_ECHO) -e "\033[1;40;36mGenerated a report file : $(PATH_CONVER_PROFILE).html\033[01;m\x1b[0m"
 	@$(CMD_ECHO) -e "\033[1;40;36mDone\033[01;m\x1b[0m"
 
@@ -133,14 +134,14 @@ pprof::
 	@$(CMD_MKDIR) -p $(PATH_REPORT)/raw/ $(PATH_REPORT)/doc/
 	@$(CMD_ECHO)  -e "\033[1;40;32mGenerate profiles.\033[01;m\x1b[0m"
 	@$(CMD_ECHO)  -e "\033[1;40;33mGenerate a CPU profile.\033[01;m\x1b[0m"
-	@$(CMD_GO) test -tags unittest -test.parallel 4 -bench . -benchmem -cpuprofile=$(PATH_REPORT)/raw/$(PATH_PROF_CPU)
+	@$(EXEC_GO) test -tags unittest -test.parallel 4 -bench . -benchmem -cpuprofile=$(PATH_REPORT)/raw/$(PATH_PROF_CPU)
 	@$(CMD_ECHO)  -e "\033[1;40;33mGenerate a Memory profile.\033[01;m\x1b[0m"
-	@$(CMD_GO) test -tags unittest -test.parallel 4 -bench . -benchmem -memprofile=$(PATH_REPORT)/raw/$(PATH_PROF_MEM)
+	@$(EXEC_GO) test -tags unittest -test.parallel 4 -bench . -benchmem -memprofile=$(PATH_REPORT)/raw/$(PATH_PROF_MEM)
 	@$(CMD_ECHO)  -e "\033[1;40;33mGenerate a Block profile.\033[01;m\x1b[0m"
-	@$(CMD_GO) test -tags unittest -test.parallel 4 -bench . -benchmem -blockprofile=$(PATH_REPORT)/raw/$(PATH_PROF_BLOCK)
+	@$(EXEC_GO) test -tags unittest -test.parallel 4 -bench . -benchmem -blockprofile=$(PATH_REPORT)/raw/$(PATH_PROF_BLOCK)
 ifeq ($(GOLANGV18_OVER),1)
 	@$(CMD_ECHO)  -e "\033[1;40;33mGenerate a Mutex profile.\033[01;m\x1b[0m"
-	@$(CMD_GO) test -tags unittest -test.parallel 4 -bench . -benchmem -mutexprofile=$(PATH_REPORT)/raw/$(PATH_PROF_MUTEX)
+	@$(EXEC_GO) test -tags unittest -test.parallel 4 -bench . -benchmem -mutexprofile=$(PATH_REPORT)/raw/$(PATH_PROF_MUTEX)
 endif
 	@$(CMD_MV) -f *.test $(PATH_REPORT)/raw/
 	@$(CMD_ECHO) -e "\033[1;40;36mDone\033[01;m\x1b[0m"
@@ -149,18 +150,18 @@ endif
 report: pprof
 	@$(CMD_MKDIR) -p $(PATH_REPORT)/raw/ $(PATH_REPORT)/doc/
 	@$(CMD_ECHO)  -e "\033[1;40;33mGenerate all report in text format.\033[01;m\x1b[0m"
-	@$(CMD_GO) tool pprof -text $(PATH_REPORT)/raw/$(PKG_NAME).test $(PATH_REPORT)/raw/$(PATH_PROF_CPU) > $(PATH_REPORT)/doc/$(PATH_PROF_CPU).txt
-	@$(CMD_GO) tool pprof -text $(PATH_REPORT)/raw/$(PKG_NAME).test $(PATH_REPORT)/raw/$(PATH_PROF_MEM) > $(PATH_REPORT)/doc/$(PATH_PROF_MEM).txt
-	@$(CMD_GO) tool pprof -text $(PATH_REPORT)/raw/$(PKG_NAME).test $(PATH_REPORT)/raw/$(PATH_PROF_BLOCK) > $(PATH_REPORT)/doc/$(PATH_PROF_BLOCK).txt
+	@$(EXEC_GO) tool pprof -text $(PATH_REPORT)/raw/$(PKG_NAME).test $(PATH_REPORT)/raw/$(PATH_PROF_CPU) > $(PATH_REPORT)/doc/$(PATH_PROF_CPU).txt
+	@$(EXEC_GO) tool pprof -text $(PATH_REPORT)/raw/$(PKG_NAME).test $(PATH_REPORT)/raw/$(PATH_PROF_MEM) > $(PATH_REPORT)/doc/$(PATH_PROF_MEM).txt
+	@$(EXEC_GO) tool pprof -text $(PATH_REPORT)/raw/$(PKG_NAME).test $(PATH_REPORT)/raw/$(PATH_PROF_BLOCK) > $(PATH_REPORT)/doc/$(PATH_PROF_BLOCK).txt
 ifeq ($(GOLANGV18_OVER),1)
-	@$(CMD_GO) tool pprof -text $(PATH_REPORT)/raw/$(PKG_NAME).test $(PATH_REPORT)/raw/$(PATH_PROF_MUTEX) > $(PATH_REPORT)/doc/$(PATH_PROF_MUTEX).txt
+	@$(EXEC_GO) tool pprof -text $(PATH_REPORT)/raw/$(PKG_NAME).test $(PATH_REPORT)/raw/$(PATH_PROF_MUTEX) > $(PATH_REPORT)/doc/$(PATH_PROF_MUTEX).txt
 endif
 	@$(CMD_ECHO)  -e "\033[1;40;33mGenerate all report in pdf format.\033[01;m\x1b[0m"
-	@$(CMD_GO) tool pprof -pdf $(PATH_REPORT)/raw/$(PKG_NAME).test $(PATH_REPORT)/raw/$(PATH_PROF_CPU) > $(PATH_REPORT)/doc/$(PATH_PROF_CPU).pdf
-	@$(CMD_GO) tool pprof -pdf $(PATH_REPORT)/raw/$(PKG_NAME).test $(PATH_REPORT)/raw/$(PATH_PROF_MEM) > $(PATH_REPORT)/doc/$(PATH_PROF_MEM).pdf
-	@$(CMD_GO) tool pprof -pdf $(PATH_REPORT)/raw/$(PKG_NAME).test $(PATH_REPORT)/raw/$(PATH_PROF_BLOCK) > $(PATH_REPORT)/doc/$(PATH_PROF_BLOCK).pdf
+	@$(EXEC_GO) tool pprof -pdf $(PATH_REPORT)/raw/$(PKG_NAME).test $(PATH_REPORT)/raw/$(PATH_PROF_CPU) > $(PATH_REPORT)/doc/$(PATH_PROF_CPU).pdf
+	@$(EXEC_GO) tool pprof -pdf $(PATH_REPORT)/raw/$(PKG_NAME).test $(PATH_REPORT)/raw/$(PATH_PROF_MEM) > $(PATH_REPORT)/doc/$(PATH_PROF_MEM).pdf
+	@$(EXEC_GO) tool pprof -pdf $(PATH_REPORT)/raw/$(PKG_NAME).test $(PATH_REPORT)/raw/$(PATH_PROF_BLOCK) > $(PATH_REPORT)/doc/$(PATH_PROF_BLOCK).pdf
 ifeq ($(GOLANGV18_OVER),1)
-	@$(CMD_GO) tool pprof -pdf $(PATH_REPORT)/raw/$(PKG_NAME).test $(PATH_REPORT)/raw/$(PATH_PROF_MUTEX) > $(PATH_REPORT)/doc/$(PATH_PROF_MUTEX).pdf
+	@$(EXEC_GO) tool pprof -pdf $(PATH_REPORT)/raw/$(PKG_NAME).test $(PATH_REPORT)/raw/$(PATH_PROF_MUTEX) > $(PATH_REPORT)/doc/$(PATH_PROF_MUTEX).pdf
 endif
 	@$(CMD_ECHO) -e "\033[1;40;36mDone\033[01;m\x1b[0m"
 
