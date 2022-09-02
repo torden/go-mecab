@@ -5,7 +5,7 @@ Go(golang) Binding to the mecab-ko
 ----
 
 [![Build Status](https://github.com/torden/go-mecab/actions/workflows/go-mecab.yml/badge.svg)](https://github.com/torden/go-mecab/actions)
-[![Go Report Card](https://goreportcard.com/badge/github.com/torden/go-mecab)](https://goreportcard.com/report/github.com/torden/go-mecab)
+[![Go Report Card](https://img.shields.io/badge/go%20report-A+-brightgreen.svg?style=flat)](https://goreportcard.com/report/github.com/torden/go-mecab)
 [![GoDoc](https://godoc.org/github.com/torden/go-mecab?status.svg)](https://godoc.org/github.com/torden/go-mecab)
 [![codecov](https://codecov.io/gh/torden/go-mecab/branch/master/graph/badge.svg?token=04152a42-5140-4337-b82b-c50655ada485)](https://codecov.io/gh/torden/go-mecab)
 [![Coverage Status](https://coveralls.io/repos/github/torden/go-mecab/badge.svg?branch=master)](https://coveralls.io/github/torden/go-mecab?branch=master)
