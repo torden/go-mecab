@@ -1,1 +1,3 @@
 theme: jekyll-theme-cayman
+title: go-mecab
+description: Go(golang) bindings to the mecab-ko
