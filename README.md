@@ -1,5 +1,9 @@
 # go-mecab
 
+Go(golang) Binding to the mecab-ko
+
+----
+
 [![Build Status](https://github.com/torden/go-mecab/actions/workflows/go-mecab.yml/badge.svg)](https://github.com/torden/go-mecab/actions)
 [![Go Report Card](https://goreportcard.com/badge/github.com/torden/go-mecab)](https://goreportcard.com/report/github.com/torden/go-mecab)
 [![GoDoc](https://godoc.org/github.com/torden/go-mecab?status.svg)](https://godoc.org/github.com/torden/go-mecab)
