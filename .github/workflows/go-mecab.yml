@@ -26,13 +26,15 @@ jobs:
     - name: Run build
       run: |
         make clean setup build
-    - name : Run Unittest
-      run: |
-        go test -v -test.parallel 4 -race -coverprofile=coverage.txt  -covermode=atomic
-    - name: Upload coverage report
-      uses: codecov/codecov-action@v1.0.2
-      with:
-        token: 04152a42-5140-4337-b82b-c50655ada485
-        file: ./coverage.txt
-        flags: unittests
+        
+#    - name : Run Unittest
+#      run: |
+#        go test -v -test.parallel 4 -race -coverprofile=coverage.txt  -covermode=atomic
+#        
+#    - name: Upload coverage report
+#      uses: codecov/codecov-action@v1.0.2
+#      with:
+#        token: 04152a42-5140-4337-b82b-c50655ada485
+#        file: ./coverage.txt
+#        flags: unittests
         name: go-mecab
