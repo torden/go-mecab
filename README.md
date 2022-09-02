@@ -18,6 +18,12 @@ Go(golang) Binding to the mecab-ko
 
 You need to tell Go where MeCab has been installed.
 
+## Install from Pre-build Packages
+
+- [Ubuntu Package](https://github.com/torden/go-mecab/tree/develop/pkg/ubuntu)
+- [RedHat(CentOS) Package](https://github.com/torden/go-mecab/tree/develop/pkg/rhel)
+
+
 ```bash
 CGO_CFLAGS=-I/path/to/include -I./ CGO_LDFLAGS=-L/path/to/lib -lmecab -lstdc++ -Wl,-rpath,/path/to/lib -lmecab go get github.com/torden/go-mecab
 ```
