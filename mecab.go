@@ -7,6 +7,7 @@ package mecab
 //#include <string.h>
 //#include <mecab.h>
 import "C"
+
 import (
 	"errors"
 	"fmt"
@@ -103,7 +104,6 @@ type Item struct {
 
 // GetValues returns string slice of List of NLP Analyzed Data
 func (n *NLPAnalyzed) GetValues() []string {
-
 	var retval []string
 
 	for _, val := range n.Result {
@@ -126,10 +126,9 @@ type MeCab struct {
 	mutx        sync.RWMutex
 }
 
-var useNewMeCab = 0 //for panic(SIGSEGV)
+var useNewMeCab = 0 // for panic(SIGSEGV)
 
 func checkNewMeCab() error {
-
 	if useNewMeCab == 0 {
 		return errors.New("object not initilized(NewMeCab()) go-mecab (MeCab-Ko)")
 	}
@@ -139,7 +138,6 @@ func checkNewMeCab() error {
 
 // NewMeCab Creates and returns a MeCab Library methods's pointer.
 func NewMeCab(dicpath string) *MeCab {
-
 	if len(strings.TrimSpace(dicpath)) < 1 {
 		fmt.Fprintf(os.Stderr, "`dicpath(=%s)` was empty\n", dicpath)
 		return nil
@@ -171,7 +169,6 @@ func NewMeCab(dicpath string) *MeCab {
 
 // checkInit does check the Initilization, if not inited, returns error
 func (m *MeCab) checkInit() error {
-
 	err := checkNewMeCab()
 	if err != nil {
 		return err
@@ -186,7 +183,6 @@ func (m *MeCab) checkInit() error {
 
 // checkInit does check the Mecab's Model Initilization, if not inited, returns error
 func (m *MeCab) checkInitModel() error {
-
 	err := checkNewMeCab()
 	if err != nil {
 		return err
@@ -206,7 +202,6 @@ func (m *MeCab) Version() string {
 
 // LastError returns last error
 func (m *MeCab) LastError() error {
-
 	retval := C.GoString(C.mecab_strerror(nil))
 	if len(retval) < 1 {
 		return nil
@@ -217,7 +212,6 @@ func (m *MeCab) LastError() error {
 
 // Init does Initialization the mecab, if an error occurs, returns error
 func (m *MeCab) Init() error {
-
 	err := checkNewMeCab()
 	if err != nil {
 		return err
@@ -248,7 +242,6 @@ func (m *MeCab) Init() error {
 
 // InitModel does Initialization the mecab's model, if an error occurs, returns error
 func (m *MeCab) InitModel() error {
-
 	err := checkNewMeCab()
 	if err != nil {
 		return err
@@ -265,22 +258,22 @@ func (m *MeCab) InitModel() error {
 	}
 
 	dicArgv := C.CString(m.dicPath)
-	//defer C.free(unsafe.Pointer(dicArgv))
+	// defer C.free(unsafe.Pointer(dicArgv))
 
-	//mecab_model_t
+	// mecab_model_t
 	m.pmodel = C.mecab_model_new2(dicArgv)
 
 	if m.pmodel == nil {
 		return errors.New(C.GoString(C.mecab_strerror(m.pmecab)))
 	}
 
-	//mecab_t
+	// mecab_t
 	m.ptagger = C.mecab_model_new_tagger(m.pmodel)
 	if m.ptagger == nil {
 		return errors.New(C.GoString(C.mecab_strerror(m.pmecab)))
 	}
 
-	//mecab_lattice_t
+	// mecab_lattice_t
 	m.plattice = C.mecab_model_new_lattice(m.pmodel)
 	if m.plattice == nil {
 		return errors.New(C.GoString(C.mecab_strerror(m.pmecab)))
@@ -293,8 +286,7 @@ func (m *MeCab) InitModel() error {
 
 // Destroy closes the MeCab-Ko's underlying file descriptor and delete objects
 func (m *MeCab) Destroy() {
-
-	if useNewMeCab == 0 { //didn't init
+	if useNewMeCab == 0 { // didn't init
 		return
 	}
 
@@ -335,7 +327,6 @@ func (m *MeCab) Destroy() {
 // You should not delete the returned string.
 // The returned buffer is overwritten when parse method is called again.
 func (m *MeCab) SParseToStr(input string) (string, error) {
-
 	if err := m.checkInit(); err != nil {
 		return "", err
 	}
@@ -361,7 +352,6 @@ func (m *MeCab) SParseToStr(input string) (string, error) {
 // You should not delete the returned string.
 // The returned buffer is overwritten when parse method is called again.
 func (m *MeCab) NBestSparseToStr(input string, size int) (string, error) {
-
 	if err := m.checkInit(); err != nil {
 		return "", err
 	}
@@ -383,7 +373,6 @@ func (m *MeCab) NBestSparseToStr(input string, size int) (string, error) {
 // NBestInit Does Initialize N-best enumeration with a sentence.
 // if an error occurs, returns error
 func (m *MeCab) NBestInit(input string) error {
-
 	if err := m.checkInit(); err != nil {
 		return err
 	}
@@ -405,7 +394,6 @@ func (m *MeCab) NBestInit(input string) error {
 // GetPartial Returns true if partial parsing mode is on.
 // if an error occurs, returns error
 func (m *MeCab) GetPartial() (bool, error) {
-
 	if err := m.checkInit(); err != nil {
 		return false, err
 	}
@@ -421,7 +409,6 @@ func (m *MeCab) GetPartial() (bool, error) {
 // SetPartial Sets partial parsing mode.
 // if an error occurs, returns error
 func (m *MeCab) SetPartial(partial bool) error {
-
 	if err := m.checkInit(); err != nil {
 		return err
 	}
@@ -441,7 +428,6 @@ func (m *MeCab) SetPartial(partial bool) error {
 // Obtain next-best result. The internal linked list structure is updated.
 // You should set MECAB_NBEST reques_type in advance.
 func (m *MeCab) NBestNextToStr() (string, error) {
-
 	if err := m.checkInit(); err != nil {
 		return "", err
 	}
@@ -457,7 +443,6 @@ func (m *MeCab) NBestNextToStr() (string, error) {
 // GetLatticeLevel Returns lattice level.
 // if an error occurs, returns error
 func (m *MeCab) GetLatticeLevel() (int, error) {
-
 	if err := m.checkInit(); err != nil {
 		return int(-1), err
 	}
@@ -469,7 +454,6 @@ func (m *MeCab) GetLatticeLevel() (int, error) {
 // SetLatticeLevel Sets lattice level.
 // if an error occurs, returns error
 func (m *MeCab) SetLatticeLevel(level int) error {
-
 	if err := m.checkInit(); err != nil {
 		return err
 	}
@@ -481,7 +465,6 @@ func (m *MeCab) SetLatticeLevel(level int) error {
 // GetAllMorphs Returns true if all morphs output mode is on.
 // if an error occurs, returns error
 func (m *MeCab) GetAllMorphs() (bool, error) {
-
 	if err := m.checkInit(); err != nil {
 		return false, err
 	}
@@ -497,7 +480,6 @@ func (m *MeCab) GetAllMorphs() (bool, error) {
 // SetAllMorphs Sets all-morphs output mode.
 // if an error occurs, returns error
 func (m *MeCab) SetAllMorphs(allmorphs bool) error {
-
 	if err := m.checkInit(); err != nil {
 		return err
 	}
@@ -514,7 +496,6 @@ func (m *MeCab) SetAllMorphs(allmorphs bool) error {
 // GetTheTA Returns temperature parameter theta.
 // if an error occurs, returns error
 func (m *MeCab) GetTheTA() (float32, error) {
-
 	if err := m.checkInit(); err != nil {
 		return float32(-1), err
 	}
@@ -526,7 +507,6 @@ func (m *MeCab) GetTheTA() (float32, error) {
 // SetTheTA Sets temperature parameter theta.
 // if an error occurs, returns error
 func (m *MeCab) SetTheTA(theta float32) error {
-
 	if err := m.checkInit(); err != nil {
 		return err
 	}
@@ -538,7 +518,6 @@ func (m *MeCab) SetTheTA(theta float32) error {
 // GetDictionaryInfo Returns Dictionary Information.
 // if an error occurs, returns error
 func (m *MeCab) GetDictionaryInfo() ([]DicInfo, error) {
-
 	var retval []DicInfo
 
 	err := checkNewMeCab()
@@ -578,7 +557,6 @@ func (m *MeCab) GetDictionaryInfo() ([]DicInfo, error) {
 // if an error occurs, returns error
 // This method does not take the ownership of the object.
 func (m *MeCab) LatticeSetSentence(input string) error {
-
 	if err := m.checkInitModel(); err != nil {
 		return err
 	}
@@ -588,13 +566,11 @@ func (m *MeCab) LatticeSetSentence(input string) error {
 	C.mecab_lattice_set_sentence(m.plattice, cInputString)
 
 	return nil
-
 }
 
 // ParseLattice Does Parse lattice object.
 // if an error occurs, returns error
 func (m *MeCab) ParseLattice() error {
-
 	if err := m.checkInitModel(); err != nil {
 		return err
 	}
@@ -612,7 +588,6 @@ func (m *MeCab) ParseLattice() error {
 // Returned object is managed by this instance.
 // When clear/LatticeSetSentence() method is called, the returned buffer is initialized.
 func (m *MeCab) LatticeToSTR() (string, error) {
-
 	if err := m.checkInitModel(); err != nil {
 		return "", err
 	}
@@ -624,7 +599,6 @@ func (m *MeCab) LatticeToSTR() (string, error) {
 // LatticeGetBosNode Returns bos (begin of sentence) node.
 // if an error occurs, returns error
 func (m *MeCab) LatticeGetBosNode() (*C.struct_mecab_node_t, error) {
-
 	if err := m.checkInitModel(); err != nil {
 		return nil, err
 	}
@@ -636,7 +610,6 @@ func (m *MeCab) LatticeGetBosNode() (*C.struct_mecab_node_t, error) {
 // LatticeGetEosNode Returns bos (end of sentence) node.
 // if an error occurs, returns error
 func (m *MeCab) LatticeGetEosNode() (*C.struct_mecab_node_t, error) {
-
 	if err := m.checkInitModel(); err != nil {
 		return nil, err
 	}
@@ -648,7 +621,6 @@ func (m *MeCab) LatticeGetEosNode() (*C.struct_mecab_node_t, error) {
 // parser does parsing the nlp analyzed data
 // if an error occurs, returns error
 func (m *MeCab) parser(text string, taglist ...string) (NLPAnalyzed, error) {
-
 	var err error
 	var retval NLPAnalyzed
 
@@ -667,7 +639,6 @@ func (m *MeCab) parser(text string, taglist ...string) (NLPAnalyzed, error) {
 	err = m.ParseLattice()
 	if err != nil {
 		return retval, err
-
 	}
 
 	tmpres, err := m.LatticeToSTR()
@@ -692,7 +663,6 @@ func (m *MeCab) parser(text string, taglist ...string) (NLPAnalyzed, error) {
 		tmpval := strings.Split(tmpitem[1], ",")
 
 		if argc > 0 {
-
 			for _, tag := range taglist {
 				if tmpval[0] == tag {
 					retval.Result = append(retval.Result, Item{Value: tmpitem[0], Tag: tmpval[0]})
@@ -700,7 +670,6 @@ func (m *MeCab) parser(text string, taglist ...string) (NLPAnalyzed, error) {
 			}
 		} else {
 			retval.Result = append(retval.Result, Item{Value: tmpitem[0], Tag: tmpval[0]})
-
 		}
 	}
 
@@ -763,7 +732,6 @@ func (m *MeCab) ByTagWithTagInfo(text string, taglist ...string) (NLPAnalyzed, e
 // ByTag returns the nlp analyzed data by tag-id (begins with prefix) without tag-id
 // if an error occurs, returns error
 func (m *MeCab) ByTag(text string, taglist ...string) ([]string, error) {
-
 	var retval []string
 	var err error
 

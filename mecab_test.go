@@ -10,8 +10,10 @@ import (
 
 var assert = strutils.NewAssert()
 
-var defaultDicPath = "/usr/local/mecab-ko/lib/mecab/dic/mecab-ko-dic/"
-var gMeCab = mecab.NewMeCab(defaultDicPath)
+var (
+	defaultDicPath = "/usr/local/mecab-ko/lib/mecab/dic/mecab-ko-dic/"
+	gMeCab         = mecab.NewMeCab(defaultDicPath)
+)
 
 var str_kr = `mecab-ko는 은전한닢 프로젝트에서 사용하기 위한 MeCab의 fork 프로젝트 입니다.
 최소한의 변경으로 한국어의 특성에 맞는 기능을 추가하는 것이 목표입니다.`
@@ -20,17 +22,18 @@ var str_jp = `MeCabはオープンソースの形態素解析エンジンで、�
 現GoogleソフトウェアエンジニアでGoogle 日本語入力開発者の一人である工藤拓によって開発されている。
 名称は開発者の好物「和布蕪（めかぶ）」から取られた。`
 
-var tagList = []string{"NNG", "NNP", "NNB", "NNBC", "NR", "NP",
+var tagList = []string{
+	"NNG", "NNP", "NNB", "NNBC", "NR", "NP",
 	"VV", "VA", "VX", "VCP", "VCN",
 	"MM", "MAG", "MAJ",
 	"IC",
 	"JKS", "JKC", "JKG", "JKO", "JKB", "JKV", "JKQ", "JX", "JC",
 	"EP", "EF", "EC", "ETN", "ETM",
 	"XPN", "XSN", "XSV", "XSA", "XR",
-	"SF", "SE", "SSO", "SSC", "SC", "SY", "SL", "SH", "SN"}
+	"SF", "SE", "SSO", "SSC", "SC", "SY", "SL", "SH", "SN",
+}
 
 func Test_mecab_NewMeCab(t *testing.T) {
-
 	err1 := mecab.NewMeCab("            ")
 	assert.AssertNotNil(t, err1, "failed to testing about empty dicpath")
 
@@ -60,7 +63,6 @@ func Test_mecab_NewMeCab(t *testing.T) {
 }
 
 func Test_mecab_SParseToStr(t *testing.T) {
-
 	var err error
 
 	str := `太郎は次郎が持っている本を花子に渡した。`
@@ -76,7 +78,6 @@ func Test_mecab_SParseToStr(t *testing.T) {
 }
 
 func Test_mecab_NBestSparseToStr(t *testing.T) {
-
 	str := `太郎は次郎が持っている本を花子に渡した。`
 	str_ok := "太\tNNG,*,F,태,*,*,*,*\n郎\tSH,*,*,*,*,*,*,*\nは\tSL,*,*,*,*,*,*,*\n次\tXSN,*,F,차,*,*,*,*\n郎\tSH,*,*,*,*,*,*,*\nが\tSL,*,*,*,*,*,*,*\n持\tSH,*,*,*,*,*,*,*\nっている\tSL,*,*,*,*,*,*,*\n本\tXSN,*,T,본,*,*,*,*\nを\tSL,*,*,*,*,*,*,*\n花子\tNNG,*,F,화자,*,*,*,*\nに\tSL,*,*,*,*,*,*,*\n渡\tSH,*,*,*,*,*,*,*\nした\tSL,*,*,*,*,*,*,*\n。\tSY,*,*,*,*,*,*,*\nEOS\n太\tNNG,*,F,태,*,*,*,*\n郎\tSH,*,*,*,*,*,*,*\nは\tSL,*,*,*,*,*,*,*\n次\tXSN,*,F,차,*,*,*,*\n郎\tSH,*,*,*,*,*,*,*\nが\tSL,*,*,*,*,*,*,*\n持\tSH,*,*,*,*,*,*,*\nっている\tSL,*,*,*,*,*,*,*\n本\tNNG,*,T,본,*,*,*,*\nを\tSL,*,*,*,*,*,*,*\n花子\tNNG,*,F,화자,*,*,*,*\nに\tSL,*,*,*,*,*,*,*\n渡\tSH,*,*,*,*,*,*,*\nした\tSL,*,*,*,*,*,*,*\n。\tSY,*,*,*,*,*,*,*\nEOS\n太\tNNG,*,F,태,*,*,*,*\n郎\tSH,*,*,*,*,*,*,*\nは\tSL,*,*,*,*,*,*,*\n次\tXSN,*,F,차,*,*,*,*\n郎\tSH,*,*,*,*,*,*,*\nが\tSL,*,*,*,*,*,*,*\n持\tSH,*,*,*,*,*,*,*\nっている\tSL,*,*,*,*,*,*,*\n本\tXPN,*,T,본,*,*,*,*\nを\tSL,*,*,*,*,*,*,*\n花子\tNNG,*,F,화자,*,*,*,*\nに\tSL,*,*,*,*,*,*,*\n渡\tSH,*,*,*,*,*,*,*\nした\tSL,*,*,*,*,*,*,*\n。\tSY,*,*,*,*,*,*,*\nEOS\n"
 
@@ -87,7 +88,6 @@ func Test_mecab_NBestSparseToStr(t *testing.T) {
 }
 
 func Test_mecab_Partial(t *testing.T) {
-
 	var retval bool
 	var err error
 	gMeCab.Init()
@@ -103,13 +103,12 @@ func Test_mecab_Partial(t *testing.T) {
 	assert.AssertNil(t, err, "failed to testing about GetPartial")
 	assert.AssertTrue(t, retval, "failed to testing about GetPartial(=%t)", retval)
 
-	//roll-back
+	// roll-back
 	err = gMeCab.SetPartial(false)
 	assert.AssertNil(t, err, "failed to testing about SetPartial")
 }
 
 func Test_mecab_AllMorphs(t *testing.T) {
-
 	var retval bool
 	var err error
 	gMeCab.Init()
@@ -125,13 +124,12 @@ func Test_mecab_AllMorphs(t *testing.T) {
 	assert.AssertNil(t, err, "failed to testing about GetAllMorphs")
 	assert.AssertTrue(t, retval, "failed to testing about GetAllMorphs(=%t)", retval)
 
-	//roll-back
+	// roll-back
 	err = gMeCab.SetAllMorphs(false)
 	assert.AssertNil(t, err, "failed to testing about SetAllMorphs")
 }
 
 func Test_mecab_TheTA(t *testing.T) {
-
 	var retval float32
 	var err error
 	gMeCab.Init()
@@ -147,13 +145,12 @@ func Test_mecab_TheTA(t *testing.T) {
 	assert.AssertNil(t, err, "failed to testing about GetTheTA")
 	assert.AssertEquals(t, retval, float32(0.95), "Return Value mismatch.\nExpected: %v\nActual: %v", retval, float32(0.95))
 
-	//roll-back
+	// roll-back
 	err = gMeCab.SetTheTA(0.75)
 	assert.AssertNil(t, err, "failed to testing about SetTheTA")
 }
 
 func Test_mecab_GetDictionaryInfo(t *testing.T) {
-
 	test1 := mecab.NewMeCab("/usr/local/mecab-ko/lib/mecab/dic/mecab-ko-dic/")
 	test1.GetDictionaryInfo()
 
@@ -173,8 +170,8 @@ func Test_mecab_GetDictionaryInfo(t *testing.T) {
 }
 
 func Test_mecab_NounsWithTagInfo_KR(t *testing.T) {
-
-	ok_nouns_kr_with_tag := map[string]string{"은전한닢": "NNG+NR+NNG",
+	ok_nouns_kr_with_tag := map[string]string{
+		"은전한닢": "NNG+NR+NNG",
 		"프로젝트": "NNG",
 		"사용":   "NNG",
 		"최소한":  "NNG",
@@ -198,8 +195,8 @@ func Test_mecab_NounsWithTagInfo_KR(t *testing.T) {
 }
 
 func Test_mecab_NounsWithTagInfo_JP(t *testing.T) {
-
-	ok_nouns_jp_with_tag := map[string]string{"形態": "NNG",
+	ok_nouns_jp_with_tag := map[string]string{
+		"形態": "NNG",
 		"素":  "NNG",
 		"解析": "NNG",
 		"奈良": "NNG",
@@ -231,7 +228,6 @@ func Test_mecab_NounsWithTagInfo_JP(t *testing.T) {
 }
 
 func Test_mecab_Pos_KR(t *testing.T) {
-
 	ok_full_kr_with_tag_json := `{"Result":[{"Value":"mecab","Tag":"SL"},{"Value":"-","Tag":"SY"},{"Value":"ko","Tag":"SL"},{"Value":"는","Tag":"JX"},{"Value":"은전한닢","Tag":"NNG+NR+NNG"},{"Value":"프로젝트","Tag":"NNG"},{"Value":"에서","Tag":"JKB"},{"Value":"사용","Tag":"NNG"},{"Value":"하","Tag":"XSV"},{"Value":"기","Tag":"ETN"},{"Value":"위한","Tag":"VV+ETM"},{"Value":"MeCab","Tag":"SL"},{"Value":"의","Tag":"JKG"},{"Value":"fork","Tag":"SL"},{"Value":"프로젝트","Tag":"NNG"},{"Value":"입니다","Tag":"VCP+EF"},{"Value":".","Tag":"SF"},{"Value":"최소한","Tag":"NNG"},{"Value":"의","Tag":"JKG"},{"Value":"변경","Tag":"NNG"},{"Value":"으로","Tag":"JKB"},{"Value":"한국어","Tag":"NNG"},{"Value":"의","Tag":"JKG"},{"Value":"특성","Tag":"NNG"},{"Value":"에","Tag":"JKB"},{"Value":"맞","Tag":"VV"},{"Value":"는","Tag":"ETM"},{"Value":"기능","Tag":"NNG"},{"Value":"을","Tag":"JKO"},{"Value":"추가","Tag":"NNG"},{"Value":"하","Tag":"XSV"},{"Value":"는","Tag":"ETM"},{"Value":"것","Tag":"NNB"},{"Value":"이","Tag":"JKS"},{"Value":"목표","Tag":"NNG"},{"Value":"입니다","Tag":"VCP+EF"},{"Value":".","Tag":"SF"}]}`
 
 	result, err := gMeCab.Pos(str_kr)
@@ -246,7 +242,6 @@ func Test_mecab_Pos_KR(t *testing.T) {
 }
 
 func Test_mecab_Pos_JP(t *testing.T) {
-
 	ok_full_jp_with_tag_json := `{"Result":[{"Value":"MeCab","Tag":"SL"},{"Value":"は","Tag":"SL"},{"Value":"オープンソース","Tag":"SL"},{"Value":"の","Tag":"SL"},{"Value":"形態","Tag":"NNG"},{"Value":"素","Tag":"NNG"},{"Value":"解析","Tag":"NNG"},{"Value":"エンジン","Tag":"SL"},{"Value":"で","Tag":"SL"},{"Value":"、","Tag":"SY"},{"Value":"奈良","Tag":"NNG"},{"Value":"先端","Tag":"NNG"},{"Value":"科","Tag":"NNG"},{"Value":"学","Tag":"SH"},{"Value":"技術","Tag":"NNG"},{"Value":"大","Tag":"NNG"},{"Value":"学","Tag":"SH"},{"Value":"院","Tag":"NNG"},{"Value":"大","Tag":"NNG"},{"Value":"学","Tag":"SH"},{"Value":"出身","Tag":"NNG"},{"Value":"、","Tag":"SY"},{"Value":"現","Tag":"NNG"},{"Value":"Google","Tag":"SL"},{"Value":"ソフトウェアエンジニア","Tag":"SL"},{"Value":"で","Tag":"SL"},{"Value":"Google","Tag":"SL"},{"Value":"日本","Tag":"NNG"},{"Value":"語","Tag":"XSN"},{"Value":"入力","Tag":"NNG"},{"Value":"開","Tag":"SH"},{"Value":"発","Tag":"SH"},{"Value":"者","Tag":"XSN"},{"Value":"の","Tag":"SL"},{"Value":"一人","Tag":"SH"},{"Value":"である","Tag":"SL"},{"Value":"工","Tag":"NNG"},{"Value":"藤","Tag":"NNG"},{"Value":"拓","Tag":"SH"},{"Value":"によって","Tag":"SL"},{"Value":"開","Tag":"SH"},{"Value":"発","Tag":"SH"},{"Value":"されている","Tag":"SL"},{"Value":"。","Tag":"SY"},{"Value":"名","Tag":"NNG"},{"Value":"称","Tag":"SH"},{"Value":"は","Tag":"SL"},{"Value":"開","Tag":"SH"},{"Value":"発","Tag":"SH"},{"Value":"者","Tag":"XSN"},{"Value":"の","Tag":"SL"},{"Value":"好物","Tag":"NNG"},{"Value":"「","Tag":"SSO"},{"Value":"和","Tag":"NNG"},{"Value":"布","Tag":"SH"},{"Value":"蕪","Tag":"SH"},{"Value":"（","Tag":"SY"},{"Value":"めかぶ","Tag":"SL"},{"Value":"）」","Tag":"SY"},{"Value":"から","Tag":"SL"},{"Value":"取","Tag":"NNG"},{"Value":"られた","Tag":"SL"},{"Value":"。","Tag":"SY"}]}`
 
 	result, err := gMeCab.Pos(str_jp)
@@ -261,7 +256,6 @@ func Test_mecab_Pos_JP(t *testing.T) {
 }
 
 func Test_mecab_Nouns_KR(t *testing.T) {
-
 	ok_nouns_kr := map[string]bool{
 		"은전한닢": true,
 		"프로젝트": true,
@@ -286,7 +280,6 @@ func Test_mecab_Nouns_KR(t *testing.T) {
 }
 
 func Test_mecab_Nouns_JP(t *testing.T) {
-
 	ok_nouns_jp := map[string]bool{
 		"形態": true,
 		"素":  true,
@@ -319,7 +312,6 @@ func Test_mecab_Nouns_JP(t *testing.T) {
 }
 
 func Test_mecab_Morphs_KR(t *testing.T) {
-
 	ok_full_kr_without_tag := map[string]bool{
 		"mecab": true,
 		"-":     true,
@@ -362,56 +354,55 @@ func Test_mecab_Morphs_KR(t *testing.T) {
 }
 
 func Test_mecab_Morphs_JP(t *testing.T) {
-
 	ok_full_jp_without_tag := map[string]bool{
-		"MeCab": true,
-		"は":     true,
-		"オープンソース": true,
-		"の":      true,
-		"形態":     true,
-		"素":      true,
-		"解析":     true,
-		"エンジン":   true,
-		"で":      true,
-		"、":      true,
-		"奈良":     true,
-		"先端":     true,
-		"科":      true,
-		"学":      true,
-		"技術":     true,
-		"大":      true,
-		"院":      true,
-		"出身":     true,
-		"現":      true,
-		"Google": true,
+		"MeCab":       true,
+		"は":           true,
+		"オープンソース":     true,
+		"の":           true,
+		"形態":          true,
+		"素":           true,
+		"解析":          true,
+		"エンジン":        true,
+		"で":           true,
+		"、":           true,
+		"奈良":          true,
+		"先端":          true,
+		"科":           true,
+		"学":           true,
+		"技術":          true,
+		"大":           true,
+		"院":           true,
+		"出身":          true,
+		"現":           true,
+		"Google":      true,
 		"ソフトウェアエンジニア": true,
-		"日本":    true,
-		"語":     true,
-		"入力":    true,
-		"開":     true,
-		"発":     true,
-		"者":     true,
-		"一人":    true,
-		"である":   true,
-		"工":     true,
-		"藤":     true,
-		"拓":     true,
-		"によって":  true,
-		"されている": true,
-		"。":     true,
-		"名":     true,
-		"称":     true,
-		"好物":    true,
-		"「":     true,
-		"和":     true,
-		"布":     true,
-		"蕪":     true,
-		"（":     true,
-		"めかぶ":   true,
-		"）」":    true,
-		"から":    true,
-		"取":     true,
-		"られた":   true,
+		"日本":          true,
+		"語":           true,
+		"入力":          true,
+		"開":           true,
+		"発":           true,
+		"者":           true,
+		"一人":          true,
+		"である":         true,
+		"工":           true,
+		"藤":           true,
+		"拓":           true,
+		"によって":        true,
+		"されている":       true,
+		"。":           true,
+		"名":           true,
+		"称":           true,
+		"好物":          true,
+		"「":           true,
+		"和":           true,
+		"布":           true,
+		"蕪":           true,
+		"（":           true,
+		"めかぶ":         true,
+		"）」":          true,
+		"から":          true,
+		"取":           true,
+		"られた":         true,
 	}
 
 	result, err := gMeCab.Morphs(str_jp)
@@ -424,7 +415,6 @@ func Test_mecab_Morphs_JP(t *testing.T) {
 }
 
 func Test_mecab_ByTagWithTagInfo_KR(t *testing.T) {
-
 	var ok_kr map[string]string
 
 	ok_kr_NNG := map[string]string{"은전한닢": "NNG+NR+NNG", "프로젝트": "NNG", "사용": "NNG", "최소한": "NNG", "변경": "NNG", "한국어": "NNG", "특성": "NNG", "기능": "NNG", "추가": "NNG", "목표": "NNG"}
@@ -496,7 +486,6 @@ func Test_mecab_ByTagWithTagInfo_KR(t *testing.T) {
 }
 
 func Test_mecab_ByTag_JP(t *testing.T) {
-
 	var ok_jp map[string]string
 
 	ok_jp_NNG := map[string]string{
@@ -525,13 +514,13 @@ func Test_mecab_ByTag_JP(t *testing.T) {
 	ok_jp_SSO := map[string]string{"「": "SSO"}
 	ok_jp_SY := map[string]string{"、": "SY", "。": "SY", "（": "SY", "）」": "SY"}
 	ok_jp_SL := map[string]string{
-		"MeCab": "SL",
-		"は":     "SL",
-		"オープンソース": "SL",
-		"の":      "SL",
-		"エンジン":   "SL",
-		"で":      "SL",
-		"Google": "SL",
+		"MeCab":       "SL",
+		"は":           "SL",
+		"オープンソース":     "SL",
+		"の":           "SL",
+		"エンジン":        "SL",
+		"で":           "SL",
+		"Google":      "SL",
 		"ソフトウェアエンジニア": "SL",
 		"である":         "SL",
 		"によって":        "SL",
