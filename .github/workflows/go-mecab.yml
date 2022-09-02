@@ -30,7 +30,7 @@ jobs:
     - name: Upload coverage report
       uses: codecov/codecov-action@v1.0.2
       with:
-        token: f4874627-203c-4986-8629-4b024d7eb51b
+        token: 04152a42-5140-4337-b82b-c50655ada485
         file: ./coverage.txt
         flags: unittests
         name: go-mdbm
