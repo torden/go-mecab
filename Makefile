@@ -3,34 +3,34 @@ PKG_NAME=go-mecab
 VERSION				:= $(shell git describe --tags --always --dirty="-dev")
 DATE				:= $(shell date -u '+%Y-%m-%d-%H%M UTC')
 VERSION_FLAGS		:= -ldflags='-X "main.Version=$(VERSION)" -X "main.BuildTime=$(DATE)"'
-PLATFORM        	:=$(shell uname -a)
-CMD_RM          	:=$(shell which rm)
-CMD_CC          	:=$(shell which gcc)
-CMD_STRIP       	:=$(shell which strip)
-CMD_DIFF        	:=$(shell which diff)
-CMD_RM          	:=$(shell which rm)
-CMD_BASH        	:=$(shell which bash)
-CMD_CP          	:=$(shell which cp)
-CMD_AR          	:=$(shell which ar)
-CMD_RANLIB      	:=$(shell which ranlib)
-CMD_MV          	:=$(shell which mv)
+PLATFORM			:=$(shell uname -a)
+CMD_RM				:=$(shell which rm)
+CMD_CC				:=$(shell which gcc)
+CMD_STRIP		 	:=$(shell which strip)
+CMD_DIFF			:=$(shell which diff)
+CMD_RM				:=$(shell which rm)
+CMD_BASH			:=$(shell which bash)
+CMD_CP				:=$(shell which cp)
+CMD_AR				:=$(shell which ar)
+CMD_RANLIB			:=$(shell which ranlib)
+CMD_MV				:=$(shell which mv)
 CMD_AWK				:=$(shell which awk)
 CMD_SED				:=$(shell which sed)
-CMD_TAIL        	:=$(shell which tail)
-CMD_FIND        	:=$(shell which find)
-CMD_LDD         	:=$(shell which ldd)
-CMD_MKDIR       	:=$(shell which mkdir)
-CMD_TEST        	:=$(shell which test)
-CMD_SLEEP       	:=$(shell which sleep)
-CMD_SYNC        	:=$(shell which sync)
-CMD_LN          	:=$(shell which ln)
-CMD_ZIP        		:=$(shell which zip)
-CMD_MD5SUM      	:=$(shell which md5sum)
-CMD_READELF     	:=$(shell which readelf)
-CMD_GDB         	:=$(shell which gdb)
-CMD_FILE        	:=$(shell which file)
-CMD_ECHO        	:=$(shell which echo)
-CMD_NM          	:=$(shell which nm)
+CMD_TAIL			:=$(shell which tail)
+CMD_FIND			:=$(shell which find)
+CMD_LDD				:=$(shell which ldd)
+CMD_MKDIR			:=$(shell which mkdir)
+CMD_TEST			:=$(shell which test)
+CMD_SLEEP			:=$(shell which sleep)
+CMD_SYNC			:=$(shell which sync)
+CMD_LN				:=$(shell which ln)
+CMD_ZIP				:=$(shell which zip)
+CMD_MD5SUM			:=$(shell which md5sum)
+CMD_READELF			:=$(shell which readelf)
+CMD_GDB				:=$(shell which gdb)
+CMD_FILE			:=$(shell which file)
+CMD_ECHO			:=$(shell which echo)
+CMD_NM				:=$(shell which nm)
 CMD_GO				:=$(shell which go)
 CMD_GOLINT			:=$(shell which golint)
 CMD_GOMETALINTER	:=$(shell which gometalinter)
@@ -48,35 +48,39 @@ PATH_PROF_MEM=$(PKG_NAME).mem.prof
 PATH_PROF_BLOCK=$(PKG_NAME).block.prof
 PATH_PROF_MUTEX=$(PKG_NAME).mutex.prof
 
+
 PREFIX_MECAB?=/usr/local/mecab-ko
 MECAB_LDFLAGS		:=$(shell $(PREFIX_MECAB)/bin/mecab-config --libs)
 MECAB_ONLY_LD_PATH	:=$(shell $(PREFIX_MECAB)/bin/mecab-config --libs-only-L)
 MECAB_CFLAGS 		:=$(shell $(PREFIX_MECAB)/bin/mecab-config --cflags)
 MECAB_DICPDIR		:=$(shell $(PREFIX_MECAB)/bin/mecab-config --dicdir)
 
+VER_GOLANG=$(shell go version | awk '{print $$3}' | sed -e "s/go//;s/\.//g")
+GOLANGV110_OVER=$(shell [ "$(VER_GOLANG)" -gt "110" ] && echo 1 || echo 0)
+GOLANGV19_OVER=$(shell [ "$(VER_GOLANG)" -ge "190" ] && echo 1 || echo 0)
+GOLANGV18_OVER=$(shell [ "$(VER_GOLANG)" -ge "180" ] && echo 1 || echo 0)
+GOLANGV17_OVER=$(shell [ "$(VER_GOLANG)" -ge "170" ] && echo 1 || echo 0)
+GOLANGV16_OVER=$(shell [ "$(VER_GOLANG)" -ge "169" ] && echo 1 || echo 0)
+
+
 EXEC_GO=CGO_CFLAGS="$(MECAB_CFLAGS) -I./" CGO_LDFLAGS="$(MECAB_LDFLAGS) -Wl,-rpath,$(MECAB_ONLY_LD_PATH)" $(CMD_GO)
 
 VER_GOLANG=$(shell go version | awk '{print $$3}' | sed -e "s/go//;s/\.//g")
 GOLANGV18_OVER=$(shell [ "$(VER_GOLANG)" -ge "180" ] && echo 1 || echo 0)
 
-all: clean setup
+all: clean setup build
 
 ## Setup Build Environment
 setup::
 	@$(CMD_ECHO)  -e "\033[1;40;32mSetup Build Environment.\033[01;m\x1b[0m"
-	@$(CMD_GO) get github.com/Masterminds/glide
 	@$(CMD_GO) get github.com/Songmu/make2help/cmd/make2help
 	@$(CMD_GO) get github.com/davecgh/go-spew/spew
 	@$(CMD_GO) get github.com/k0kubun/pp
-	@$(CMD_GO) get github.com/alecthomas/gometalinter
 	@$(CMD_GO) get github.com/mattn/goveralls
-	@$(CMD_GO) get golang.org/x/tools/cmd/cover
 	@$(CMD_GO) get github.com/modocache/gover
-	@$(CMD_GO) get github.com/golang/lint/golint
+	@$(CMD_GO) get golang.org/x/lint
 	@$(CMD_GO) get github.com/awalterschulze/gographviz
-	@$(CMD_GO) get github.com/tools/godep
 	@$(CMD_GO) get github.com/torden/go-strutil
-	@$(CMD_GOMETALINTER) install
 	@$(CMD_ECHO) -e "\033[1;40;36mDone\033[01;m\x1b[0m"
 
 ## Build the go-mecab
