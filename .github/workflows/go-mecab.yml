@@ -37,4 +37,4 @@ jobs:
 #        token: 04152a42-5140-4337-b82b-c50655ada485
 #        file: ./coverage.txt
 #        flags: unittests
-        name: go-mecab
+#        name: go-mecab
